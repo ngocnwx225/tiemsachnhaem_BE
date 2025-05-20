@@ -1,13 +1,11 @@
-# Book E-commerce Backend API
-
-Backend API cho ứng dụng bán sách trực tuyến.
+# Book E-commerce API
 
 ## Cài đặt
 
 1. Clone repository:
 ```bash
-git clone https://github.com/ngocnwx225/tiemsachnhaem_BE.git
-cd tiemsachnhaem_BE
+git clone <repository-url>
+cd Book-E-commerce
 ```
 
 2. Cài đặt dependencies:
@@ -16,51 +14,249 @@ npm install
 ```
 
 3. Tạo file .env và cấu hình các biến môi trường:
-```
+```env
 PORT=3000
-SERVER_URI_MONGODB=your_mongodb_connection_string
+MONGODB_URI=mongodb://localhost:27017/book-ecommerce
+JWT_SECRET=your_jwt_secret_key_here
 ```
 
-4. Khởi động server:
+4. Chạy server:
 ```bash
 npm start
 ```
 
 ## API Documentation
 
-API documentation có sẵn tại: http://localhost:3000/api-docs
+### Authentication APIs
 
-## Các API Endpoints
+#### Đăng ký
+```http
+POST /api/auth/register
+Content-Type: application/json
 
-### Catalog
-- GET `/api/catalogs`: Lấy tất cả catalog
-- GET `/api/catalogs/:id`: Lấy catalog theo ID
-- POST `/api/catalogs`: Tạo catalog mới
-- PUT `/api/catalogs/:id`: Cập nhật catalog
-- DELETE `/api/catalogs/:id`: Xóa catalog
+{
+    "username": "admin",
+    "password": "password123",
+    "role": "admin"
+}
+```
 
-### Order
-- GET `/api/orders`: Lấy tất cả orders
-- GET `/api/orders/:id`: Lấy order theo ID
-- POST `/api/orders`: Tạo order mới
-- PUT `/api/orders/:id`: Cập nhật order
-- DELETE `/api/orders/:id`: Xóa order
+#### Đăng nhập
+```http
+POST /api/auth/login
+Content-Type: application/json
 
-### Review
-- GET `/api/reviews`: Lấy tất cả reviews
-- GET `/api/reviews/:id`: Lấy review theo ID
-- POST `/api/reviews`: Tạo review mới
-- PUT `/api/reviews/:id`: Cập nhật review
-- DELETE `/api/reviews/:id`: Xóa review
+{
+    "username": "admin",
+    "password": "password123"
+}
+```
 
-## Công nghệ sử dụng
+#### Đăng xuất
+```http
+POST /api/auth/logout
+Authorization: Bearer your_jwt_token
+```
 
-- Node.js
-- Express.js
-- MongoDB
-- Mongoose
-- Swagger/OpenAPI
+### Admin APIs
 
-## License
+#### Lấy danh sách admin
+```http
+GET /api/admins
+Authorization: Bearer your_jwt_token
+```
 
-MIT 
+#### Lấy thông tin admin theo ID
+```http
+GET /api/admins/:id
+Authorization: Bearer your_jwt_token
+```
+
+#### Tạo admin mới
+```http
+POST /api/admins
+Authorization: Bearer your_jwt_token
+Content-Type: application/json
+
+{
+    "username": "newadmin",
+    "password": "password123",
+    "role": "admin"
+}
+```
+
+#### Cập nhật admin
+```http
+PUT /api/admins/:id
+Authorization: Bearer your_jwt_token
+Content-Type: application/json
+
+{
+    "username": "updatedadmin",
+    "role": "superadmin"
+}
+```
+
+#### Xóa admin
+```http
+DELETE /api/admins/:id
+Authorization: Bearer your_jwt_token
+```
+
+### Catalog APIs
+
+#### Lấy danh sách sách
+```http
+GET /api/catalog
+```
+
+#### Lấy thông tin sách theo ID
+```http
+GET /api/catalog/:id
+```
+
+#### Tạo sách mới
+```http
+POST /api/catalog
+Authorization: Bearer your_jwt_token
+Content-Type: application/json
+
+{
+    "title": "Book Title",
+    "author": "Author Name",
+    "price": 29.99,
+    "description": "Book description",
+    "category": "Fiction"
+}
+```
+
+#### Cập nhật sách
+```http
+PUT /api/catalog/:id
+Authorization: Bearer your_jwt_token
+Content-Type: application/json
+
+{
+    "title": "Updated Title",
+    "price": 39.99
+}
+```
+
+#### Xóa sách
+```http
+DELETE /api/catalog/:id
+Authorization: Bearer your_jwt_token
+```
+
+### Order APIs
+
+#### Lấy danh sách đơn hàng
+```http
+GET /api/orders
+Authorization: Bearer your_jwt_token
+```
+
+#### Lấy thông tin đơn hàng theo ID
+```http
+GET /api/orders/:id
+Authorization: Bearer your_jwt_token
+```
+
+#### Tạo đơn hàng mới
+```http
+POST /api/orders
+Authorization: Bearer your_jwt_token
+Content-Type: application/json
+
+{
+    "items": [
+        {
+            "bookId": "book_id_here",
+            "quantity": 2
+        }
+    ],
+    "shippingAddress": "123 Street Name, City, Country"
+}
+```
+
+#### Cập nhật trạng thái đơn hàng
+```http
+PUT /api/orders/:id
+Authorization: Bearer your_jwt_token
+Content-Type: application/json
+
+{
+    "status": "shipped"
+}
+```
+
+### Review APIs
+
+#### Lấy danh sách đánh giá
+```http
+GET /api/reviews
+```
+
+#### Lấy đánh giá theo ID
+```http
+GET /api/reviews/:id
+```
+
+#### Tạo đánh giá mới
+```http
+POST /api/reviews
+Authorization: Bearer your_jwt_token
+Content-Type: application/json
+
+{
+    "bookId": "book_id_here",
+    "rating": 5,
+    "comment": "Great book!"
+}
+```
+
+#### Cập nhật đánh giá
+```http
+PUT /api/reviews/:id
+Authorization: Bearer your_jwt_token
+Content-Type: application/json
+
+{
+    "rating": 4,
+    "comment": "Updated review"
+}
+```
+
+#### Xóa đánh giá
+```http
+DELETE /api/reviews/:id
+Authorization: Bearer your_jwt_token
+```
+
+## Authentication
+
+Hầu hết các API endpoints yêu cầu xác thực thông qua JWT token. Để sử dụng các API được bảo vệ:
+
+1. Đăng nhập để lấy JWT token
+2. Thêm token vào header của request:
+```
+Authorization: Bearer your_jwt_token
+```
+
+## Error Handling
+
+API trả về các mã lỗi HTTP phổ biến:
+- 200: Thành công
+- 201: Tạo mới thành công
+- 400: Lỗi dữ liệu đầu vào
+- 401: Chưa xác thực
+- 403: Không có quyền truy cập
+- 404: Không tìm thấy
+- 500: Lỗi server
+
+## Swagger Documentation
+
+API documentation đầy đủ có thể truy cập tại:
+```
+http://localhost:3000/api-docs
+``` 
