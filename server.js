@@ -26,6 +26,9 @@ app.use(express.json());
 // Swagger UI
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 
+
+
+
 // Route mẫu
 app.get('/', (req, res) => {
   res.send('Hello World from Express with MongoDB!');
