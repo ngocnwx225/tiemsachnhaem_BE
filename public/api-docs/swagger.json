@@ -7,8 +7,8 @@
   },
   "servers": [
     {
-      "url": "http://localhost:3000",
-      "description": "Development server"
+      "url": "/api",
+      "description": "API Server"
     }
   ],
   "components": {
@@ -55,7 +55,7 @@
     }
   },
   "paths": {
-    "/api/auth/register": {
+    "/auth/register": {
       "post": {
         "tags": ["Authentication"],
         "summary": "Đăng ký tài khoản admin mới",
@@ -82,7 +82,7 @@
         }
       }
     },
-    "/api/auth/login": {
+    "/auth/login": {
       "post": {
         "tags": ["Authentication"],
         "summary": "Đăng nhập",
@@ -121,7 +121,7 @@
         }
       }
     },
-    "/api/auth/logout": {
+    "/auth/logout": {
       "post": {
         "tags": ["Authentication"],
         "summary": "Đăng xuất",
@@ -140,7 +140,7 @@
         }
       }
     },
-    "/api/catalog": {
+    "/catalog": {
       "get": {
         "tags": ["Catalog"],
         "summary": "Lấy tất cả catalog",
@@ -194,7 +194,7 @@
         }
       }
     },
-    "/api/catalog/{id}": {
+    "/catalog/{id}": {
       "get": {
         "tags": ["Catalog"],
         "summary": "Lấy catalog theo ID",
