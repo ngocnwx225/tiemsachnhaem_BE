@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const catalogController = require('../controllers/catalogController');
+const authMiddleware = require('../middleware/authMiddleware');
 
 /**
  * @swagger
@@ -24,10 +25,10 @@ const catalogController = require('../controllers/catalogController');
 
 /**
  * @swagger
- * /api/catalogs:
+ * /api/catalog:
  *   get:
  *     summary: Lấy tất cả catalog
- *     tags: [Catalogs]
+ *     tags: [Catalog]
  *     responses:
  *       200:
  *         description: Danh sách catalog
@@ -44,10 +45,10 @@ router.get('/', catalogController.getAllCatalogs);
 
 /**
  * @swagger
- * /api/catalogs/{id}:
+ * /api/catalog/{id}:
  *   get:
  *     summary: Lấy catalog theo ID
- *     tags: [Catalogs]
+ *     tags: [Catalog]
  *     parameters:
  *       - in: path
  *         name: id
@@ -71,10 +72,12 @@ router.get('/:id', catalogController.getCatalogById);
 
 /**
  * @swagger
- * /api/catalogs:
+ * /api/catalog:
  *   post:
  *     summary: Tạo catalog mới
- *     tags: [Catalogs]
+ *     tags: [Catalog]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -86,15 +89,19 @@ router.get('/:id', catalogController.getCatalogById);
  *         description: Catalog đã được tạo thành công
  *       400:
  *         description: Dữ liệu không hợp lệ
+ *       401:
+ *         description: Unauthorized
  */
-router.post('/', catalogController.createCatalog);
+router.post('/', authMiddleware, catalogController.createCatalog);
 
 /**
  * @swagger
- * /api/catalogs/{id}:
+ * /api/catalog/{id}:
  *   put:
  *     summary: Cập nhật catalog
- *     tags: [Catalogs]
+ *     tags: [Catalog]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -115,15 +122,19 @@ router.post('/', catalogController.createCatalog);
  *         description: Không tìm thấy catalog
  *       400:
  *         description: Dữ liệu không hợp lệ
+ *       401:
+ *         description: Unauthorized
  */
-router.put('/:id', catalogController.updateCatalog);
+router.put('/:id', authMiddleware, catalogController.updateCatalog);
 
 /**
  * @swagger
- * /api/catalogs/{id}:
+ * /api/catalog/{id}:
  *   delete:
  *     summary: Xóa catalog
- *     tags: [Catalogs]
+ *     tags: [Catalog]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -138,7 +149,9 @@ router.put('/:id', catalogController.updateCatalog);
  *         description: Không tìm thấy catalog
  *       500:
  *         description: Lỗi server
+ *       401:
+ *         description: Unauthorized
  */
-router.delete('/:id', catalogController.deleteCatalog);
+router.delete('/:id', authMiddleware, catalogController.deleteCatalog);
 
 module.exports = router; 

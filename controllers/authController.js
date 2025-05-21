@@ -5,12 +5,12 @@ const jwt = require('jsonwebtoken');
 // Đăng ký admin mới
 exports.register = async (req, res) => {
     try {
-        const { username, password, role } = req.body;
+        const { adminName, password } = req.body;
 
-        // Kiểm tra username đã tồn tại chưa
-        const existingAdmin = await AdminLogin.findOne({ username });
+        // Kiểm tra adminName đã tồn tại chưa
+        const existingAdmin = await AdminLogin.findOne({ adminName });
         if (existingAdmin) {
-            return res.status(400).json({ error: 'Username đã tồn tại' });
+            return res.status(400).json({ error: 'Tên admin đã tồn tại' });
         }
 
         // Mã hóa mật khẩu
@@ -19,15 +19,15 @@ exports.register = async (req, res) => {
 
         // Tạo admin mới
         const admin = new AdminLogin({
-            username,
-            password: hashedPassword,
-            role: role || 'admin'
+            adminName,
+            password: hashedPassword
         });
 
         await admin.save();
 
         res.status(201).json({ message: 'Đăng ký thành công' });
     } catch (err) {
+        console.error('Lỗi đăng ký:', err);
         res.status(500).json({ error: 'Lỗi khi đăng ký' });
     }
 };
@@ -35,12 +35,12 @@ exports.register = async (req, res) => {
 // Đăng nhập
 exports.login = async (req, res) => {
     try {
-        const { username, password } = req.body;
+        const { adminName, password } = req.body;
 
-        // Kiểm tra username
-        const admin = await AdminLogin.findOne({ username });
+        // Kiểm tra adminName
+        const admin = await AdminLogin.findOne({ adminName });
         if (!admin) {
-            return res.status(400).json({ error: 'Username không tồn tại' });
+            return res.status(400).json({ error: 'Tên admin không tồn tại' });
         }
 
         // Kiểm tra mật khẩu
@@ -51,7 +51,7 @@ exports.login = async (req, res) => {
 
         // Tạo JWT token
         const token = jwt.sign(
-            { id: admin._id, role: admin.role },
+            { id: admin._id },
             process.env.JWT_SECRET,
             { expiresIn: '1d' }
         );
@@ -60,22 +60,23 @@ exports.login = async (req, res) => {
             token,
             admin: {
                 id: admin._id,
-                username: admin.username,
-                role: admin.role
+                adminName: admin.adminName
             }
         });
     } catch (err) {
+        console.error('Lỗi đăng nhập:', err);
         res.status(500).json({ error: 'Lỗi khi đăng nhập' });
     }
 };
 
 // Đăng xuất
-exports.logout = async (req, res) => {
+exports.logout = (req, res) => {
     try {
         // Trong trường hợp sử dụng JWT, chúng ta không cần xử lý gì ở phía server
         // Client sẽ tự xóa token
         res.json({ message: 'Đăng xuất thành công' });
     } catch (err) {
+        console.error('Lỗi đăng xuất:', err);
         res.status(500).json({ error: 'Lỗi khi đăng xuất' });
     }
 }; 

@@ -6,8 +6,9 @@ const authController = require('../controllers/authController');
  * @swagger
  * /api/auth/register:
  *   post:
- *     summary: Đăng ký admin mới
- *     tags: [Authentication]
+ *     tags:
+ *       - Authentication
+ *     summary: Register a new user
  *     requestBody:
  *       required: true
  *       content:
@@ -16,24 +17,25 @@ const authController = require('../controllers/authController');
  *             type: object
  *             required:
  *               - username
+ *               - email
  *               - password
  *             properties:
  *               username:
  *                 type: string
- *                 description: Tên đăng nhập
+ *                 example: johndoe
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: john@example.com
  *               password:
  *                 type: string
- *                 description: Mật khẩu
- *               role:
- *                 type: string
- *                 description: Vai trò của admin
+ *                 format: password
+ *                 example: password123
  *     responses:
  *       201:
- *         description: Đăng ký thành công
+ *         description: User registered successfully
  *       400:
- *         description: Username đã tồn tại
- *       500:
- *         description: Lỗi server
+ *         description: Invalid input
  */
 router.post('/register', authController.register);
 
@@ -41,8 +43,9 @@ router.post('/register', authController.register);
  * @swagger
  * /api/auth/login:
  *   post:
- *     summary: Đăng nhập
- *     tags: [Authentication]
+ *     tags:
+ *       - Authentication
+ *     summary: Login user
  *     requestBody:
  *       required: true
  *       content:
@@ -50,18 +53,20 @@ router.post('/register', authController.register);
  *           schema:
  *             type: object
  *             required:
- *               - username
+ *               - email
  *               - password
  *             properties:
- *               username:
+ *               email:
  *                 type: string
- *                 description: Tên đăng nhập
+ *                 format: email
+ *                 example: john@example.com
  *               password:
  *                 type: string
- *                 description: Mật khẩu
+ *                 format: password
+ *                 example: password123
  *     responses:
  *       200:
- *         description: Đăng nhập thành công
+ *         description: Login successful
  *         content:
  *           application/json:
  *             schema:
@@ -69,20 +74,9 @@ router.post('/register', authController.register);
  *               properties:
  *                 token:
  *                   type: string
- *                   description: JWT token
- *                 admin:
- *                   type: object
- *                   properties:
- *                     id:
- *                       type: string
- *                     username:
- *                       type: string
- *                     role:
- *                       type: string
- *       400:
- *         description: Thông tin đăng nhập không đúng
- *       500:
- *         description: Lỗi server
+ *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ *       401:
+ *         description: Invalid credentials
  */
 router.post('/login', authController.login);
 
