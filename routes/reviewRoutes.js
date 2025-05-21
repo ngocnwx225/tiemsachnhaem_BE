@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const reviewController = require('../controllers/reviewController');
+const authMiddleware = require('../middleware/authMiddleware');
 
 /**
  * @swagger
@@ -102,7 +103,7 @@ router.get('/:id', reviewController.getReviewById);
  *       400:
  *         description: Dữ liệu không hợp lệ
  */
-router.post('/', reviewController.createReview);
+router.post('/', authMiddleware, reviewController.createReview);
 
 /**
  * @swagger
@@ -131,7 +132,7 @@ router.post('/', reviewController.createReview);
  *       400:
  *         description: Dữ liệu không hợp lệ
  */
-router.put('/:id', reviewController.updateReview);
+router.put('/:id', authMiddleware, reviewController.updateReview);
 
 /**
  * @swagger
@@ -154,6 +155,6 @@ router.put('/:id', reviewController.updateReview);
  *       500:
  *         description: Lỗi server
  */
-router.delete('/:id', reviewController.deleteReview);
+router.delete('/:id', authMiddleware, reviewController.deleteReview);
 
 module.exports = router; 

@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const orderController = require('../controllers/orderController');
+const authMiddleware = require('../middleware/authMiddleware');
 
 /**
  * @swagger
@@ -61,7 +62,7 @@ const orderController = require('../controllers/orderController');
  *       500:
  *         description: Lỗi server
  */
-router.get('/', orderController.getAllOrders);
+router.get('/', authMiddleware, orderController.getAllOrders);
 
 /**
  * @swagger
@@ -88,7 +89,7 @@ router.get('/', orderController.getAllOrders);
  *       500:
  *         description: Lỗi server
  */
-router.get('/:id', orderController.getOrderById);
+router.get('/:id', authMiddleware, orderController.getOrderById);
 
 /**
  * @swagger
@@ -108,7 +109,7 @@ router.get('/:id', orderController.getOrderById);
  *       400:
  *         description: Dữ liệu không hợp lệ
  */
-router.post('/', orderController.createOrder);
+router.post('/', authMiddleware, orderController.createOrder);
 
 /**
  * @swagger
@@ -137,7 +138,7 @@ router.post('/', orderController.createOrder);
  *       400:
  *         description: Dữ liệu không hợp lệ
  */
-router.put('/:id', orderController.updateOrder);
+router.put('/:id', authMiddleware, orderController.updateOrder);
 
 /**
  * @swagger
@@ -160,6 +161,6 @@ router.put('/:id', orderController.updateOrder);
  *       500:
  *         description: Lỗi server
  */
-router.delete('/:id', orderController.deleteOrder);
+router.delete('/:id', authMiddleware, orderController.deleteOrder);
 
 module.exports = router; 

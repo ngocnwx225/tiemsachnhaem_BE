@@ -1,0 +1,311 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Book E-commerce API",
+    "version": "1.0.0",
+    "description": "API documentation for Book E-commerce application"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Development server"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "Catalog": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Auto-generated MongoDB ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "Tên catalog"
+          },
+          "description": {
+            "type": "string",
+            "description": "Mô tả catalog"
+          }
+        }
+      },
+      "AdminLogin": {
+        "type": "object",
+        "required": ["adminName", "password"],
+        "properties": {
+          "adminName": {
+            "type": "string",
+            "description": "Tên đăng nhập của admin"
+          },
+          "password": {
+            "type": "string",
+            "description": "Mật khẩu"
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/api/auth/register": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Đăng ký tài khoản admin mới",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminLogin"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Đăng ký thành công"
+          },
+          "400": {
+            "description": "Dữ liệu không hợp lệ"
+          },
+          "500": {
+            "description": "Lỗi server"
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Đăng nhập",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminLogin"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Đăng nhập thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Thông tin đăng nhập không chính xác"
+          },
+          "500": {
+            "description": "Lỗi server"
+          }
+        }
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Đăng xuất",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Đăng xuất thành công"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/api/catalog": {
+      "get": {
+        "tags": ["Catalog"],
+        "summary": "Lấy tất cả catalog",
+        "responses": {
+          "200": {
+            "description": "Danh sách catalog",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Catalog"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Lỗi server"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Catalog"],
+        "summary": "Tạo catalog mới",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Catalog"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Catalog đã được tạo thành công"
+          },
+          "400": {
+            "description": "Dữ liệu không hợp lệ"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/api/catalog/{id}": {
+      "get": {
+        "tags": ["Catalog"],
+        "summary": "Lấy catalog theo ID",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "ID của catalog"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Thông tin catalog",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Catalog"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Không tìm thấy catalog"
+          },
+          "500": {
+            "description": "Lỗi server"
+          }
+        }
+      },
+      "put": {
+        "tags": ["Catalog"],
+        "summary": "Cập nhật catalog",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "ID của catalog"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Catalog"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Catalog đã được cập nhật"
+          },
+          "404": {
+            "description": "Không tìm thấy catalog"
+          },
+          "400": {
+            "description": "Dữ liệu không hợp lệ"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Catalog"],
+        "summary": "Xóa catalog",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "ID của catalog"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Catalog đã được xóa"
+          },
+          "404": {
+            "description": "Không tìm thấy catalog"
+          },
+          "500": {
+            "description": "Lỗi server"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    }
+  }
+} 

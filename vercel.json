@@ -11,8 +11,16 @@
       {
         "src": "/(.*)",
         "dest": "server.js"
+      },
+      {
+        "src": "/api-docs/(.*)",
+        "headers": {
+          "Cache-Control": "no-cache"
+        },
+        "dest": "/api-docs/$1"
       }
     ],
+    
     "git": {
     "deploymentEnabled": {
       "main": true, 
