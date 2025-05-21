@@ -14,6 +14,8 @@ const MONGODB_URI = process.env.SERVER_URI_MONGODB;
 const catalogRoutes = require('./routes/catalogRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
+const authRoutes = require('./routes/authRoutes');
+
 
 // Kết nối MongoDB
 mongoose.connect(MONGODB_URI)
@@ -31,13 +33,15 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 
 // Route mẫu
 app.get('/', (req, res) => {
-  res.send('Hello World from Express with MongoDB!');
+  res.send('Hello World from Express with MongoDB!!!');
 });
 
 // Sử dụng routes
 app.use('/api/catalogs', catalogRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/reviews', reviewRoutes);
+// Routes
+app.use('/api/auth', authRoutes); 
 
 // Khởi động server
 app.listen(PORT, () => {
