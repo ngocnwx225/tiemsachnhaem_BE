@@ -12,6 +12,10 @@ const catalogRoutes = require('./routes/catalogRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
 const orderRoutes = require('./routes/orderRoutes');
+const productRoutes = require('./routes/productRoutes');
+const invoiceRoutes = require('./routes/invoiceRoutes');
+const customerRoutes = require('./routes/customerRoutes');
+const couponRoutes = require('./routes/couponRoutes');
 
 const app = express();
 
@@ -32,6 +36,10 @@ app.use('/api/catalog', catalogRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/invoices', invoiceRoutes);
+app.use('/api/customers', customerRoutes);
+app.use('/api/coupons', couponRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
