@@ -11,6 +11,6 @@ const adminLoginSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-});
+}, { collection: 'adminlogin' });
 
 module.exports = mongoose.model('adminlogin', adminLoginSchema);

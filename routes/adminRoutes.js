@@ -1,21 +1,20 @@
 const express = require('express');
 const router = express.Router();
 const adminController = require('../controllers/adminController');
-const authMiddleware = require('../middleware/authMiddleware');
 
 // Get all admins
-router.get('/', authMiddleware, adminController.getAllAdmins);
+router.get('/', adminController.getAllAdmins);
 
 // Get admin by ID
-router.get('/:id', authMiddleware, adminController.getAdminById);
+router.get('/:id', adminController.getAdminById);
 
 // Create new admin
-router.post('/', authMiddleware, adminController.createAdmin);
+router.post('/', adminController.createAdmin);
 
 // Update admin
-router.put('/:id', authMiddleware, adminController.updateAdmin);
+router.put('/:id', adminController.updateAdmin);
 
 // Delete admin
-router.delete('/:id', authMiddleware, adminController.deleteAdmin);
+router.delete('/:id', adminController.deleteAdmin);
 
 module.exports = router; 

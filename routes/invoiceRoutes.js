@@ -1,10 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const invoiceController = require('../controllers/invoiceController');
-const authMiddleware = require('../middleware/authMiddleware');
-
-// All invoice routes require authentication
-router.use(authMiddleware);
 
 // Invoice management
 router.get('/', invoiceController.getAllInvoices);

@@ -1,6 +1,5 @@
 const AdminLogin = require('../models/adminlogin');
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 
 // Đăng ký admin mới
 exports.register = async (req, res) => {
@@ -36,7 +35,7 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
     try {
         const { adminName, password } = req.body;
-
+        
         // Kiểm tra adminName
         const admin = await AdminLogin.findOne({ adminName });
         if (!admin) {
@@ -49,15 +48,8 @@ exports.login = async (req, res) => {
             return res.status(400).json({ error: 'Mật khẩu không đúng' });
         }
 
-        // Tạo JWT token
-        const token = jwt.sign(
-            { id: admin._id },
-            process.env.JWT_SECRET,
-            { expiresIn: '1d' }
-        );
-
+        // Trả về thông tin admin (không bao gồm password)
         res.json({
-            token,
             admin: {
                 id: admin._id,
                 adminName: admin.adminName
@@ -72,8 +64,6 @@ exports.login = async (req, res) => {
 // Đăng xuất
 exports.logout = (req, res) => {
     try {
-        // Trong trường hợp sử dụng JWT, chúng ta không cần xử lý gì ở phía server
-        // Client sẽ tự xóa token
         res.json({ message: 'Đăng xuất thành công' });
     } catch (err) {
         console.error('Lỗi đăng xuất:', err);
