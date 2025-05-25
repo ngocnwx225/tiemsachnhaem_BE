@@ -52,6 +52,139 @@
           }
         }
       },
+      "Product": {
+        "type": "object",
+        "required": ["name", "price", "catalogId"],
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Auto-generated MongoDB ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "Tên sản phẩm"
+          },
+          "description": {
+            "type": "string",
+            "description": "Mô tả sản phẩm"
+          },
+          "price": {
+            "type": "number",
+            "description": "Giá sản phẩm"
+          },
+          "stock": {
+            "type": "number",
+            "description": "Số lượng tồn kho"
+          },
+          "catalogId": {
+            "type": "string",
+            "description": "ID của catalog"
+          },
+          "image": {
+            "type": "string",
+            "description": "URL hình ảnh sản phẩm"
+          }
+        }
+      },
+      "Customer": {
+        "type": "object",
+        "required": ["username", "email", "password"],
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Auto-generated MongoDB ID"
+          },
+          "username": {
+            "type": "string",
+            "description": "Tên đăng nhập"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Email"
+          },
+          "password": {
+            "type": "string",
+            "description": "Mật khẩu"
+          },
+          "fullName": {
+            "type": "string",
+            "description": "Họ và tên"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Số điện thoại"
+          },
+          "address": {
+            "type": "string",
+            "description": "Địa chỉ"
+          }
+        }
+      },
+      "Invoice": {
+        "type": "object",
+        "required": ["orderId", "amount"],
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Auto-generated MongoDB ID"
+          },
+          "orderId": {
+            "type": "string",
+            "description": "ID của đơn hàng"
+          },
+          "amount": {
+            "type": "number",
+            "description": "Tổng tiền hóa đơn"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "paid", "cancelled"],
+            "description": "Trạng thái hóa đơn"
+          },
+          "paymentMethod": {
+            "type": "string",
+            "description": "Phương thức thanh toán"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Thời gian tạo hóa đơn"
+          }
+        }
+      },
+      "Coupon": {
+        "type": "object",
+        "required": ["code", "discount"],
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Auto-generated MongoDB ID"
+          },
+          "code": {
+            "type": "string",
+            "description": "Mã coupon"
+          },
+          "discount": {
+            "type": "number",
+            "description": "Giảm giá (phần trăm hoặc số tiền)"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["percentage", "fixed"],
+            "description": "Loại giảm giá"
+          },
+          "validUntil": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Ngày hết hạn"
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Trạng thái hoạt động"
+          }
+        }
+      },
       "Order": {
         "type": "object",
         "required": ["customerId", "products", "totalAmount"],
@@ -128,6 +261,14 @@
             "format": "date-time",
             "description": "Thời gian tạo đánh giá"
           }
+        }
+      },
+      "UserLog": {
+        "type": "object",
+        "properties": {
+          "_id": { "type": "string", "description": "Auto-generated MongoDB ID" },
+          "UserName": { "type": "string", "description": "Tên đăng nhập người dùng" },
+          "Password": { "type": "string", "description": "Mật khẩu người dùng" }
         }
       }
     }
@@ -214,6 +355,470 @@
           },
           "401": {
             "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/products": {
+      "get": {
+        "tags": ["Products"],
+        "summary": "Lấy danh sách sản phẩm",
+        "responses": {
+          "200": {
+            "description": "Danh sách sản phẩm",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Product"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Products"],
+        "summary": "Tạo sản phẩm mới",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Product"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Sản phẩm đã được tạo"
+          }
+        }
+      }
+    },
+    "/products/{id}": {
+      "get": {
+        "tags": ["Products"],
+        "summary": "Lấy thông tin sản phẩm",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Thông tin sản phẩm",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Product"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["Products"],
+        "summary": "Cập nhật sản phẩm",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Product"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sản phẩm đã được cập nhật"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Products"],
+        "summary": "Xóa sản phẩm",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sản phẩm đã được xóa"
+          }
+        }
+      }
+    },
+    "/customers": {
+      "get": {
+        "tags": ["Customers"],
+        "summary": "Lấy danh sách khách hàng",
+        "responses": {
+          "200": {
+            "description": "Danh sách khách hàng",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Customer"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Customers"],
+        "summary": "Tạo khách hàng mới",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Customer"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Khách hàng đã được tạo"
+          }
+        }
+      }
+    },
+    "/customers/{id}": {
+      "get": {
+        "tags": ["Customers"],
+        "summary": "Lấy thông tin khách hàng",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Thông tin khách hàng",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Customer"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["Customers"],
+        "summary": "Cập nhật thông tin khách hàng",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Customer"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Thông tin khách hàng đã được cập nhật"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Customers"],
+        "summary": "Xóa khách hàng",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Khách hàng đã được xóa"
+          }
+        }
+      }
+    },
+    "/invoices": {
+      "get": {
+        "tags": ["Invoices"],
+        "summary": "Lấy danh sách hóa đơn",
+        "responses": {
+          "200": {
+            "description": "Danh sách hóa đơn",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Invoice"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Invoices"],
+        "summary": "Tạo hóa đơn mới",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Invoice"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Hóa đơn đã được tạo"
+          }
+        }
+      }
+    },
+    "/invoices/{id}": {
+      "get": {
+        "tags": ["Invoices"],
+        "summary": "Lấy thông tin hóa đơn",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Thông tin hóa đơn",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Invoice"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["Invoices"],
+        "summary": "Cập nhật hóa đơn",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Invoice"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Hóa đơn đã được cập nhật"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Invoices"],
+        "summary": "Xóa hóa đơn",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Hóa đơn đã được xóa"
+          }
+        }
+      }
+    },
+    "/coupons": {
+      "get": {
+        "tags": ["Coupons"],
+        "summary": "Lấy danh sách coupon",
+        "responses": {
+          "200": {
+            "description": "Danh sách coupon",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Coupon"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Coupons"],
+        "summary": "Tạo coupon mới",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Coupon"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Coupon đã được tạo"
+          }
+        }
+      }
+    },
+    "/coupons/{id}": {
+      "get": {
+        "tags": ["Coupons"],
+        "summary": "Lấy thông tin coupon",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Thông tin coupon",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Coupon"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["Coupons"],
+        "summary": "Cập nhật coupon",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Coupon"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Coupon đã được cập nhật"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Coupons"],
+        "summary": "Xóa coupon",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Coupon đã được xóa"
           }
         }
       }
@@ -732,6 +1337,87 @@
           "500": {
             "description": "Lỗi server"
           }
+        }
+      }
+    },
+    "/user_logs": {
+      "get": {
+        "tags": ["UserLogs"],
+        "summary": "Lấy danh sách user logs",
+        "responses": {
+          "200": {
+            "description": "Danh sách user logs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/UserLog" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["UserLogs"],
+        "summary": "Tạo user log mới",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UserLog" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "User log đã được tạo" }
+        }
+      }
+    },
+    "/user_logs/{id}": {
+      "get": {
+        "tags": ["UserLogs"],
+        "summary": "Lấy thông tin user log",
+        "parameters": [
+          { "in": "path", "name": "id", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Thông tin user log",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UserLog" }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["UserLogs"],
+        "summary": "Cập nhật user log",
+        "parameters": [
+          { "in": "path", "name": "id", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UserLog" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "User log đã được cập nhật" }
+        }
+      },
+      "delete": {
+        "tags": ["UserLogs"],
+        "summary": "Xóa user log",
+        "parameters": [
+          { "in": "path", "name": "id", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "User log đã được xóa" }
         }
       }
     }
