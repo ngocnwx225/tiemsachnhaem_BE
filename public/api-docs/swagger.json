@@ -38,20 +38,6 @@
           }
         }
       },
-      "AdminLogin": {
-        "type": "object",
-        "required": ["adminName", "password"],
-        "properties": {
-          "adminName": {
-            "type": "string",
-            "description": "Tên đăng nhập của admin"
-          },
-          "password": {
-            "type": "string",
-            "description": "Mật khẩu"
-          }
-        }
-      },
       "Product": {
         "type": "object",
         "required": ["name", "price", "catalogId"],
@@ -83,41 +69,6 @@
           "image": {
             "type": "string",
             "description": "URL hình ảnh sản phẩm"
-          }
-        }
-      },
-      "Customer": {
-        "type": "object",
-        "required": ["username", "email", "password"],
-        "properties": {
-          "_id": {
-            "type": "string",
-            "description": "Auto-generated MongoDB ID"
-          },
-          "username": {
-            "type": "string",
-            "description": "Tên đăng nhập"
-          },
-          "email": {
-            "type": "string",
-            "format": "email",
-            "description": "Email"
-          },
-          "password": {
-            "type": "string",
-            "description": "Mật khẩu"
-          },
-          "fullName": {
-            "type": "string",
-            "description": "Họ và tên"
-          },
-          "phone": {
-            "type": "string",
-            "description": "Số điện thoại"
-          },
-          "address": {
-            "type": "string",
-            "description": "Địa chỉ"
           }
         }
       },
@@ -267,12 +218,13 @@
           }
         }
       },
-      "UserLog": {
+      "User": {
         "type": "object",
+        "required": ["fullName", "email", "password"],
         "properties": {
-          "_id": { "type": "string", "description": "Auto-generated MongoDB ID" },
-          "UserName": { "type": "string", "description": "Tên đăng nhập người dùng" },
-          "Password": { "type": "string", "description": "Mật khẩu người dùng" }
+          "fullName": { "type": "string", "description": "Họ tên người dùng" },
+          "email": { "type": "string", "description": "Email người dùng" },
+          "password": { "type": "string", "description": "Mật khẩu người dùng" }
         }
       }
     }
@@ -281,27 +233,21 @@
     "/auth/register": {
       "post": {
         "tags": ["Authentication"],
-        "summary": "Đăng ký tài khoản admin mới",
+        "summary": "Đăng ký tài khoản user mới",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/AdminLogin"
+                "$ref": "#/components/schemas/User"
               }
             }
           }
         },
         "responses": {
-          "201": {
-            "description": "Đăng ký thành công"
-          },
-          "400": {
-            "description": "Dữ liệu không hợp lệ"
-          },
-          "500": {
-            "description": "Lỗi server"
-          }
+          "201": { "description": "Đăng ký thành công" },
+          "400": { "description": "Dữ liệu không hợp lệ" },
+          "500": { "description": "Lỗi server" }
         }
       }
     },
@@ -314,33 +260,20 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/AdminLogin"
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                  "email": { "type": "string", "description": "Email người dùng" },
+                  "password": { "type": "string", "description": "Mật khẩu người dùng" }
+                }
               }
             }
           }
         },
         "responses": {
-          "200": {
-            "description": "Đăng nhập thành công",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "token": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Thông tin đăng nhập không chính xác"
-          },
-          "500": {
-            "description": "Lỗi server"
-          }
+          "200": { "description": "Đăng nhập thành công" },
+          "400": { "description": "Dữ liệu không hợp lệ" },
+          "500": { "description": "Lỗi server" }
         }
       }
     },
@@ -475,122 +408,6 @@
         "responses": {
           "200": {
             "description": "Sản phẩm đã được xóa"
-          }
-        }
-      }
-    },
-    "/customers": {
-      "get": {
-        "tags": ["Customers"],
-        "summary": "Lấy danh sách khách hàng",
-        "responses": {
-          "200": {
-            "description": "Danh sách khách hàng",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Customer"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": ["Customers"],
-        "summary": "Tạo khách hàng mới",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Customer"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Khách hàng đã được tạo"
-          }
-        }
-      }
-    },
-    "/customers/{id}": {
-      "get": {
-        "tags": ["Customers"],
-        "summary": "Lấy thông tin khách hàng",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Thông tin khách hàng",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Customer"
-                }
-              }
-            }
-          }
-        }
-      },
-      "put": {
-        "tags": ["Customers"],
-        "summary": "Cập nhật thông tin khách hàng",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Customer"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Thông tin khách hàng đã được cập nhật"
-          }
-        }
-      },
-      "delete": {
-        "tags": ["Customers"],
-        "summary": "Xóa khách hàng",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Khách hàng đã được xóa"
           }
         }
       }
@@ -1344,61 +1161,74 @@
         }
       }
     },
-    "/user_logs": {
+    "/users": {
       "get": {
-        "tags": ["UserLogs"],
-        "summary": "Lấy danh sách user logs",
+        "tags": ["Users"],
+        "summary": "Lấy danh sách user (chỉ admin)",
+        "security": [{ "bearerAuth": [] }],
         "responses": {
           "200": {
-            "description": "Danh sách user logs",
+            "description": "Danh sách user",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "array",
-                  "items": { "$ref": "#/components/schemas/UserLog" }
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "string" },
+                      "fullName": { "type": "string" },
+                      "status": { "type": "string" },
+                      "totalOrders": { "type": "integer" },
+                      "totalSpent": { "type": "number" }
+                    }
+                  }
                 }
               }
             }
-          }
-        }
-      },
-      "post": {
-        "tags": ["UserLogs"],
-        "summary": "Tạo user log mới",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": { "$ref": "#/components/schemas/UserLog" }
-            }
-          }
-        },
-        "responses": {
-          "201": { "description": "User log đã được tạo" }
+          },
+          "403": { "description": "Chỉ admin mới có quyền truy cập." }
         }
       }
     },
-    "/user_logs/{id}": {
+    "/users/{id}": {
       "get": {
-        "tags": ["UserLogs"],
-        "summary": "Lấy thông tin user log",
+        "tags": ["Users"],
+        "summary": "Lấy thông tin user theo id (chỉ admin)",
+        "security": [{ "bearerAuth": [] }],
         "parameters": [
           { "in": "path", "name": "id", "required": true, "schema": { "type": "string" } }
         ],
         "responses": {
           "200": {
-            "description": "Thông tin user log",
+            "description": "Thông tin user",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/UserLog" }
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string" },
+                    "fullName": { "type": "string" },
+                    "status": { "type": "string" },
+                    "totalOrders": { "type": "integer" },
+                    "totalSpent": { "type": "number" },
+                    "email": { "type": "string" },
+                    "phoneNumber": { "type": "string" },
+                    "address": { "type": "string" },
+                    "role": { "type": "string" }
+                  }
+                }
               }
             }
-          }
+          },
+          "403": { "description": "Chỉ admin mới có quyền truy cập." },
+          "404": { "description": "Không tìm thấy user" }
         }
       },
       "put": {
-        "tags": ["UserLogs"],
-        "summary": "Cập nhật user log",
+        "tags": ["Users"],
+        "summary": "Cập nhật user (chỉ admin)",
+        "security": [{ "bearerAuth": [] }],
         "parameters": [
           { "in": "path", "name": "id", "required": true, "schema": { "type": "string" } }
         ],
@@ -1406,22 +1236,27 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/UserLog" }
+              "schema": { "$ref": "#/components/schemas/User" }
             }
           }
         },
         "responses": {
-          "200": { "description": "User log đã được cập nhật" }
+          "200": { "description": "User đã được cập nhật" },
+          "403": { "description": "Chỉ admin mới có quyền truy cập." },
+          "404": { "description": "Không tìm thấy user" }
         }
       },
       "delete": {
-        "tags": ["UserLogs"],
-        "summary": "Xóa user log",
+        "tags": ["Users"],
+        "summary": "Xóa user (chỉ admin)",
+        "security": [{ "bearerAuth": [] }],
         "parameters": [
           { "in": "path", "name": "id", "required": true, "schema": { "type": "string" } }
         ],
         "responses": {
-          "200": { "description": "User log đã được xóa" }
+          "200": { "description": "Đã xóa user" },
+          "403": { "description": "Chỉ admin mới có quyền truy cập." },
+          "404": { "description": "Không tìm thấy user" }
         }
       }
     }

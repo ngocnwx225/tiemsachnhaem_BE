@@ -35,9 +35,9 @@ POST /api/auth/register
 Content-Type: application/json
 
 {
-    "username": "admin",
-    "password": "password123",
-    "role": "admin"
+    "fullName": "Nguyen Van A",
+    "email": "a@gmail.com",
+    "password": "123456"
 }
 ```
 
@@ -47,8 +47,8 @@ POST /api/auth/login
 Content-Type: application/json
 
 {
-    "username": "admin",
-    "password": "password123"
+    "email": "a@gmail.com",
+    "password": "123456"
 }
 ```
 
@@ -259,4 +259,50 @@ API trả về các mã lỗi HTTP phổ biến:
 API documentation đầy đủ có thể truy cập tại:
 ```
 http://localhost:3000/api-docs
-``` 
+```
+
+## API User (Chỉ dành cho admin)
+
+### Lấy danh sách user
+```http
+GET /api/users
+Authorization: Bearer <admin_jwt_token>
+```
+**Response:**
+```
+[
+  {
+    "id": "...",
+    "fullName": "Nguyen Van A",
+    "status": "active",
+    "totalOrders": 3,
+    "totalSpent": 500000
+  },
+  ...
+]
+```
+
+### Lấy thông tin user theo id
+```http
+GET /api/users/{id}
+Authorization: Bearer <admin_jwt_token>
+```
+
+### Cập nhật user
+```http
+PUT /api/users/{id}
+Authorization: Bearer <admin_jwt_token>
+Content-Type: application/json
+
+{
+  "status": "inactive"
+}
+```
+
+### Xóa user
+```http
+DELETE /api/users/{id}
+Authorization: Bearer <admin_jwt_token>
+```
+
+> **Lưu ý:** Chỉ tài khoản có role `admin` mới gọi được các API này. 

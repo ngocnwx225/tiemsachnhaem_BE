@@ -3,14 +3,14 @@ const mongoose = require('mongoose');
 
 const productBookSchema = new mongoose.Schema({
   ISBN: { type: Number, required: true, unique: true },
-  BookTitle: { type: String, required: true },
-  Publisher: { type: String, required: true },
-  Author: { type: String, required: true },
-  PageCount: { type: Number, required: true },
-  BookWeight: { type: String, required: true },
-  Price: { type: Number, required: true },
-  Description: { type: String },
-  Catalog: { type: String, required: true }
+  bookTitle: { type: String, required: true },
+  publisher: { type: String, required: true },
+  author: { type: String, required: true },
+  pageCount: { type: Number, required: true },
+  bookWeight: { type: String, required: true },
+  price: { type: Number, required: true },
+  description: { type: String },
+  catalogId: { type: mongoose.Schema.Types.ObjectId, ref: 'catalogs', required: true }
 });
 
-module.exports = mongoose.model('product_books', productBookSchema);
+module.exports = mongoose.model('Product_books', productBookSchema);

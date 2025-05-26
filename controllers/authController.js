@@ -1,30 +1,46 @@
-const AdminLogin = require('../models/adminlogin');
+const User = require('../models/user');
 const bcrypt = require('bcryptjs');
 
-// Đăng ký admin mới
+// Đăng ký user mới
 exports.register = async (req, res) => {
     try {
-        const { adminName, password } = req.body;
+        const { fullName, email, password, phoneNumber, address, role } = req.body;
 
-        // Kiểm tra adminName đã tồn tại chưa
-        const existingAdmin = await AdminLogin.findOne({ adminName });
-        if (existingAdmin) {
-            return res.status(400).json({ error: 'Tên admin đã tồn tại' });
+        // Kiểm tra các trường bắt buộc
+        if (!fullName || !email || !password) {
+            return res.status(400).json({ error: 'Vui lòng nhập đầy đủ họ tên, email và mật khẩu' });
+        }
+
+        // Kiểm tra email đã tồn tại chưa
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ error: 'Email đã tồn tại' });
         }
 
         // Mã hóa mật khẩu
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        // Tạo admin mới
-        const admin = new AdminLogin({
-            adminName,
-            password: hashedPassword
+        // Tạo user mới
+        const user = new User({
+            fullName,
+            email,
+            password: hashedPassword,
+            phoneNumber: phoneNumber || '',
+            address: address || '',
+            role: role || 'user'
         });
 
-        await admin.save();
+        await user.save();
 
-        res.status(201).json({ message: 'Đăng ký thành công' });
+        res.status(201).json({ message: 'Đăng ký thành công', user: {
+            id: user._id,
+            fullName: user.fullName,
+            phoneNumber: user.phoneNumber,
+            email: user.email,
+            address: user.address,
+            role: user.role
+        }});
     } catch (err) {
         console.error('Lỗi đăng ký:', err);
         res.status(500).json({ error: 'Lỗi khi đăng ký' });
@@ -34,25 +50,29 @@ exports.register = async (req, res) => {
 // Đăng nhập
 exports.login = async (req, res) => {
     try {
-        const { adminName, password } = req.body;
+        const { email, password } = req.body;
         
-        // Kiểm tra adminName
-        const admin = await AdminLogin.findOne({ adminName });
-        if (!admin) {
-            return res.status(400).json({ error: 'Tên admin không tồn tại' });
+        // Kiểm tra email
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(400).json({ error: 'Email không tồn tại' });
         }
 
         // Kiểm tra mật khẩu
-        const isMatch = await bcrypt.compare(password, admin.password);
+        const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.status(400).json({ error: 'Mật khẩu không đúng' });
         }
 
-        // Trả về thông tin admin (không bao gồm password)
+        // Trả về thông tin user (không bao gồm password)
         res.json({
-            admin: {
-                id: admin._id,
-                adminName: admin.adminName
+            user: {
+                id: user._id,
+                fullName: user.fullName,
+                phoneNumber: user.phoneNumber,
+                email: user.email,
+                address: user.address,
+                role: user.role
             }
         });
     } catch (err) {
