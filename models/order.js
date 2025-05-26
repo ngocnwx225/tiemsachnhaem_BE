@@ -6,11 +6,13 @@ const orderSchema = new mongoose.Schema({
   customerId: { type: String, required: true },
   productQuantity: { type: Number, required: true },
   totalAmount: { type: Number, required: true },
-  orderDate: { type: String, required: true },
-  paymentMethod: { type: String, required: true },
-  shippingAddress: { type: String, required: true },
-  status: { type: String, required: true },
-  createdAt: { type: String, required: true }
+  orderDate: { type: String },
+  paymentMethod: { type: String },
+  shippingAddress: { type: String },
+  status: { type: String },
+  createdAt: { type: String },
+  updatedAt: { type: String },
+  ISBN: { type: String }
 });
 
 module.exports = mongoose.model('orders', orderSchema);

@@ -227,6 +227,10 @@
             "type": "string",
             "format": "date-time",
             "description": "Thời gian tạo đơn hàng"
+          },
+          "ISBN": {
+            "type": "string",
+            "description": "Mã số sách quốc tế"
           }
         }
       },
