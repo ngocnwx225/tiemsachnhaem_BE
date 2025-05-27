@@ -332,6 +332,44 @@ const options = {
               description: 'Invoice status'
             }
           }
+        },
+        OrderList: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              description: 'Order ID',
+              example: '60d21b4667d0d8992e610c85'
+            },
+            customerName: {
+              type: 'string',
+              description: 'Customer full name',
+              example: 'John Doe'
+            },
+            customerEmail: {
+              type: 'string',
+              format: 'email',
+              description: 'Customer email',
+              example: 'john@example.com'
+            },
+            createdAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Order creation date',
+              example: '2024-03-15T10:30:00Z'
+            },
+            totalAmount: {
+              type: 'number',
+              description: 'Total order amount',
+              example: 299.95
+            },
+            status: {
+              type: 'string',
+              description: 'Order status',
+              enum: ['pending', 'processing', 'shipped', 'delivered'],
+              example: 'delivered'
+            }
+          }
         }
       }
     }

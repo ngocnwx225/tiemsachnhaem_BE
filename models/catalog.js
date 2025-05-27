@@ -11,9 +11,6 @@ const catalogSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  products: [
-    { type: mongoose.Schema.Types.ObjectId, ref: 'Product_books' }
-  ]
 });
 
 module.exports = mongoose.model('catalogs', catalogSchema);

@@ -1,23 +1,92 @@
 const Order = require('../models/order');
+const Product = require('../models/product_book');
 
 // Lấy tất cả orders
 exports.getAllOrders = async (req, res) => {
     try {
+        // Log để kiểm tra
+        console.log('Fetching orders...');
+        
         const orders = await Order.find();
-        res.json(orders);
+        console.log('Found orders:', orders.length);
+        
+        if (!orders || orders.length === 0) {
+            return res.json([]); // Trả về mảng rỗng nếu không có orders
+        }
+
+        // Populate thông tin user cho từng order
+        const formattedOrders = await Promise.all(orders.map(async (order) => {
+            try {
+                // Populate thông tin user
+                await order.populate('userId', 'fullName email');
+                
+                return {
+                    id: order._id,
+                    customerName: order.userId ? order.userId.fullName : 'N/A',
+                    customerEmail: order.userId ? order.userId.email : 'N/A',
+                    createdAt: order.createdAt,
+                    totalAmount: order.totalAmount || 0,
+                    status: order.status || 'pending'
+                };
+            } catch (populateError) {
+                console.error('Error populating order:', order._id, populateError);
+                // Trả về thông tin cơ bản nếu không populate được
+                return {
+                    id: order._id,
+                    customerName: 'N/A',
+                    customerEmail: 'N/A',
+                    createdAt: order.createdAt,
+                    totalAmount: order.totalAmount || 0,
+                    status: order.status || 'pending'
+                };
+            }
+        }));
+
+        console.log('Formatted orders successfully');
+        res.json(formattedOrders);
     } catch (err) {
-        res.status(500).json({ error: 'Lỗi khi lấy dữ liệu orders' });
+        console.error('Error in getAllOrders:', err);
+        res.status(500).json({ 
+            error: 'Lỗi khi lấy dữ liệu orders',
+            details: err.message 
+        });
     }
 };
 
 // Lấy order theo ID
 exports.getOrderById = async (req, res) => {
     try {
-        const order = await Order.findById(req.params.id);
+        const order = await Order.findById(req.params.id)
+            .populate('userId', 'fullName email phoneNumber address')
+            .populate('items.bookId', 'title price');
+            
         if (!order) {
             return res.status(404).json({ error: 'Không tìm thấy order' });
         }
-        res.json(order);
+
+        const formattedOrder = {
+            id: order._id,
+            customerInfo: {
+                name: order.userId.fullName,
+                email: order.userId.email,
+                phoneNumber: order.userId.phoneNumber,
+                address: order.userId.address
+            },
+            orderInfo: {
+                createdAt: order.createdAt,
+                totalAmount: order.totalAmount,
+                status: order.status
+            },
+            items: order.items.map(item => ({
+                bookId: item.bookId._id,
+                title: item.bookId.title,
+                price: item.bookId.price,
+                quantity: item.quantity,
+                subtotal: item.bookId.price * item.quantity
+            }))
+        };
+
+        res.json(formattedOrder);
     } catch (err) {
         res.status(500).json({ error: 'Lỗi khi lấy dữ liệu order' });
     }
@@ -28,9 +97,27 @@ exports.createOrder = async (req, res) => {
     try {
         const order = new Order(req.body);
         const savedOrder = await order.save();
+        
+        // Cập nhật soldCount cho từng sản phẩm trong đơn hàng
+        if (savedOrder.items && savedOrder.items.length > 0) {
+            const updatePromises = savedOrder.items.map(async (item) => {
+                // Tăng soldCount của sản phẩm theo số lượng mua
+                return Product.findByIdAndUpdate(
+                    item.bookId,
+                    { $inc: { soldCount: item.quantity } },
+                    { new: true }
+                );
+            });
+            
+            // Chờ tất cả các thao tác cập nhật hoàn tất
+            await Promise.all(updatePromises);
+            console.log('Updated soldCount for all products in the order');
+        }
+        
         res.status(201).json(savedOrder);
     } catch (err) {
-        res.status(400).json({ error: 'Lỗi khi tạo order' });
+        console.error('Error creating order:', err);
+        res.status(400).json({ error: 'Lỗi khi tạo order', details: err.message });
     }
 };
 

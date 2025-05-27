@@ -10,7 +10,11 @@ const productBookSchema = new mongoose.Schema({
   bookWeight: { type: String, required: true },
   price: { type: Number, required: true },
   description: { type: String },
-  catalogId: { type: mongoose.Schema.Types.ObjectId, ref: 'catalogs', required: true }
+  imageUrl: { type: String, required: true },
+  catalog: { type: String, required: true },
+  soldCount: { type: Number, default: 0 }
+}, {
+  timestamps: true
 });
 
 module.exports = mongoose.model('Product_books', productBookSchema);

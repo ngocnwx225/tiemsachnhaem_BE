@@ -4,9 +4,10 @@ const productController = require('../controllers/productController');
 
 // All routes are now public
 router.get('/', productController.getAllProducts);
-router.get('/:id', productController.getProductById);
+router.get('/top-selling', productController.getTopSellingProducts);
 router.get('/search', productController.searchProducts);
-router.get('/catalog/:catalogId', productController.getProductsByCatalog);
+router.get('/catalog/:catalog', productController.getProductsByCatalog);
+router.get('/:id', productController.getProductById);
 router.post('/', productController.createProduct);
 router.put('/:id', productController.updateProduct);
 router.delete('/:id', productController.deleteProduct);
