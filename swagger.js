@@ -19,6 +19,13 @@ const options = {
       },
     ],
     components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT'
+        }
+      },
       schemas: {
         Error: {
           type: 'object',
@@ -26,6 +33,148 @@ const options = {
             error: {
               type: 'string',
               description: 'Error message'
+            }
+          }
+        },
+        User: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              description: 'User ID',
+              example: '60d21b4667d0d8992e610c85'
+            },
+            fullName: {
+              type: 'string',
+              description: 'User full name',
+              example: 'John Doe'
+            },
+            email: {
+              type: 'string',
+              format: 'email',
+              description: 'User email',
+              example: 'john@example.com'
+            },
+            phoneNumber: {
+              type: 'string',
+              description: 'User phone number',
+              example: '0123456789'
+            },
+            status: {
+              type: 'string',
+              description: 'User status',
+              example: 'active'
+            },
+            role: {
+              type: 'string',
+              description: 'User role',
+              example: 'user'
+            },
+            address: {
+              type: 'string',
+              description: 'User address',
+              example: '123 Main St, City'
+            }
+          }
+        },
+        UserWithOrders: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              description: 'User ID',
+              example: '60d21b4667d0d8992e610c85'
+            },
+            fullName: {
+              type: 'string',
+              description: 'User full name',
+              example: 'John Doe'
+            },
+            email: {
+              type: 'string',
+              format: 'email',
+              description: 'User email',
+              example: 'john@example.com'
+            },
+            phoneNumber: {
+              type: 'string',
+              description: 'User phone number',
+              example: '0123456789'
+            },
+            status: {
+              type: 'string',
+              description: 'User status',
+              example: 'active'
+            },
+            role: {
+              type: 'string',
+              description: 'User role',
+              example: 'user'
+            },
+            address: {
+              type: 'string',
+              description: 'User address',
+              example: '123 Main St, City'
+            },
+            totalOrders: {
+              type: 'integer',
+              description: 'Total number of orders',
+              example: 5
+            },
+            totalSpent: {
+              type: 'number',
+              description: 'Total amount spent',
+              example: 299.95
+            },
+            orders: {
+              type: 'array',
+              description: 'List of user orders',
+              items: {
+                type: 'object',
+                properties: {
+                  id: {
+                    type: 'string',
+                    description: 'Order ID',
+                    example: '60d21b4667d0d8992e610c85'
+                  },
+                  totalAmount: {
+                    type: 'number',
+                    description: 'Order total amount',
+                    example: 59.99
+                  },
+                  status: {
+                    type: 'string',
+                    description: 'Order status',
+                    enum: ['pending', 'processing', 'shipped', 'delivered'],
+                    example: 'delivered'
+                  },
+                  createdAt: {
+                    type: 'string',
+                    format: 'date-time',
+                    description: 'Order creation date',
+                    example: '2024-03-15T10:30:00Z'
+                  },
+                  items: {
+                    type: 'array',
+                    description: 'Order items',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        bookId: {
+                          type: 'string',
+                          description: 'Book ID',
+                          example: '60d21b4667d0d8992e610c85'
+                        },
+                        quantity: {
+                          type: 'integer',
+                          description: 'Quantity ordered',
+                          example: 2
+                        }
+                      }
+                    }
+                  }
+                }
+              }
             }
           }
         },
@@ -187,7 +336,7 @@ const options = {
       }
     }
   },
-  apis: ['./routes/*.js'], // Path to the API routes
+  apis: ['./routes/*.js', './controllers/*.js'], // Path to the API routes and controllers
 };
 
 const specs = swaggerJsdoc(options);
