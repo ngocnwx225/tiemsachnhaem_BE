@@ -354,6 +354,122 @@
           }
         }
       }
+    },
+    "/api/users/{id}": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Get user by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "User ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User details retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "60d21b4667d0d8992e610c85"
+                    },
+                    "fullName": {
+                      "type": "string",
+                      "example": "John Doe"
+                    },
+                    "status": {
+                      "type": "string",
+                      "example": "active"
+                    },
+                    "totalOrders": {
+                      "type": "integer",
+                      "example": 5
+                    },
+                    "totalSpent": {
+                      "type": "number",
+                      "example": 299.95
+                    },
+                    "email": {
+                      "type": "string",
+                      "format": "email",
+                      "example": "john@example.com"
+                    },
+                    "phoneNumber": {
+                      "type": "string",
+                      "example": "0123456789"
+                    },
+                    "address": {
+                      "type": "string",
+                      "example": "123 Main St, City"
+                    },
+                    "role": {
+                      "type": "string",
+                      "example": "user"
+                    },
+                    "orders": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "example": "60d21b4667d0d8992e610c85"
+                          },
+                          "totalAmount": {
+                            "type": "number",
+                            "example": 59.99
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": ["pending", "processing", "shipped", "delivered"],
+                            "example": "delivered"
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "example": "2024-03-15T10:30:00Z"
+                          },
+                          "items": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "bookId": {
+                                  "type": "string",
+                                  "example": "60d21b4667d0d8992e610c85"
+                                },
+                                "quantity": {
+                                  "type": "integer",
+                                  "example": 2
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
     }
   }
 } 

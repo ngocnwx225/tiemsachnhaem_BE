@@ -41,7 +41,14 @@ exports.getUserById = async (req, res) => {
       email: user.email,
       phoneNumber: user.phoneNumber,
       address: user.address,
-      role: user.role
+      role: user.role,
+      orders: user.orders.map(order => ({
+        id: order._id,
+        totalAmount: order.totalAmount,
+        status: order.status,
+        createdAt: order.createdAt,
+        items: order.items
+      }))
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
