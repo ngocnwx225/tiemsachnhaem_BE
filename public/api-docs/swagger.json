@@ -224,7 +224,19 @@
         "properties": {
           "fullName": { "type": "string", "description": "Họ tên người dùng" },
           "email": { "type": "string", "description": "Email người dùng" },
-          "password": { "type": "string", "description": "Mật khẩu người dùng" }
+          "password": { "type": "string", "description": "Mật khẩu người dùng" },
+          "phoneNumber": { "type": "string", "description": "Số điện thoại người dùng" },
+          "address": { "type": "string", "description": "Địa chỉ người dùng" },
+          "status": { 
+            "type": "string", 
+            "enum": ["active", "inactive", "banned"],
+            "description": "Trạng thái tài khoản người dùng" 
+          },
+          "role": { 
+            "type": "string", 
+            "enum": ["user", "admin"],
+            "description": "Vai trò người dùng" 
+          }
         }
       }
     }
@@ -1607,7 +1619,25 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/User" }
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "fullName": { "type": "string", "description": "Họ tên người dùng" },
+                  "email": { "type": "string", "description": "Email người dùng" },
+                  "phoneNumber": { "type": "string", "description": "Số điện thoại người dùng" },
+                  "address": { "type": "string", "description": "Địa chỉ người dùng" },
+                  "status": { 
+                    "type": "string", 
+                    "enum": ["active", "inactive", "banned"],
+                    "description": "Trạng thái tài khoản người dùng" 
+                  },
+                  "role": { 
+                    "type": "string", 
+                    "enum": ["user", "admin"],
+                    "description": "Vai trò người dùng" 
+                  }
+                }
+              }
             }
           }
         },
