@@ -296,6 +296,57 @@
         }
       }
     },
+    "/auth/forgot-password": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Gửi email reset mật khẩu",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email"],
+                "properties": {
+                  "email": { "type": "string", "description": "Email người dùng cần reset mật khẩu" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Xác thực thành công" },
+          "400": { "description": "Email không tồn tại" },
+          "500": { "description": "Lỗi server" }
+        }
+      }
+    },
+    "/auth/reset-password": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Reset mật khẩu với token",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "newPassword"],
+                "properties": {
+                  "email": { "type": "string", "description": "Email người dùng" },
+                  "newPassword": { "type": "string", "description": "Mật khẩu mới" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Mật khẩu đã được cập nhật thành công" },
+          "400": { "description": "Email không tồn tại" },
+          "500": { "description": "Lỗi server" }
+        }
+      }
+    },
     "/products": {
       "get": {
         "tags": ["Products"],

@@ -104,7 +104,7 @@ exports.forgotPassword = async (req, res) => {
         res.status(200).json({ message: 'Xác thực thành công' });
     } catch (err) {
         console.error('Lỗi forgot password:', err);
-        res.status(500).json({ error: 'Lỗi khi forgot password' });
+        res.status(500).json({ error: 'Lỗi server' });
     }
 };
 
@@ -124,10 +124,10 @@ exports.resetPassword = async (req, res) => {
         user.password = hashedPassword;
         await user.save();
         //trả response 
-        res.status(200).json({ message: 'Xác thực thành công' });
+        res.status(200).json({ message: 'Mật khẩu đã được cập nhật thành công' });
 
     } catch (err) {
         console.error('Lỗi reset password:', err);
-        res.status(500).json({ error: 'Lỗi khi reset password' });
+        res.status(500).json({ error: 'Lỗi server' });
     }
 };
