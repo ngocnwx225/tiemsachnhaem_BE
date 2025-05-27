@@ -90,3 +90,44 @@ exports.logout = (req, res) => {
         res.status(500).json({ error: 'Lỗi khi đăng xuất' });
     }
 }; 
+
+//forgot password
+exports.forgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+        // Kiểm tra email
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(400).json({ error: 'Email không tồn tại' });
+        }
+        //trả response 
+        res.status(200).json({ message: 'Xác thực thành công' });
+    } catch (err) {
+        console.error('Lỗi forgot password:', err);
+        res.status(500).json({ error: 'Lỗi khi forgot password' });
+    }
+};
+
+//reset password
+exports.resetPassword = async (req, res) => {
+    try {
+        const { email, newPassword } = req.body;
+        // Kiểm tra email
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(400).json({ error: 'Email không tồn tại' });
+        }   
+        //mã hóa mật khẩu mới
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+        //cập nhật mật khẩu mới
+        user.password = hashedPassword;
+        await user.save();
+        //trả response 
+        res.status(200).json({ message: 'Xác thực thành công' });
+
+    } catch (err) {
+        console.error('Lỗi reset password:', err);
+        res.status(500).json({ error: 'Lỗi khi reset password' });
+    }
+};
