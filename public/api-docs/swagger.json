@@ -1178,6 +1178,8 @@
                     "properties": {
                       "id": { "type": "string" },
                       "fullName": { "type": "string" },
+                      "phoneNumber": { "type": "string" },
+                      "email": { "type": "string" },
                       "status": { "type": "string" },
                       "totalOrders": { "type": "integer" },
                       "totalSpent": { "type": "number" }

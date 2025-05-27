@@ -15,6 +15,7 @@ exports.getAllUsers = async (req, res) => {
         id: user._id,
         fullName: user.fullName,
         phoneNumber: user.phoneNumber,
+        email: user.email,
         status: user.status,
         totalOrders,
         totalSpent
