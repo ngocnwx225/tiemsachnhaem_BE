@@ -121,6 +121,28 @@ exports.createOrder = async (req, res) => {
         }
         orderData.totalAmount = totalAmount;
         
+        // Kiểm tra số lượng tồn kho trước khi tạo đơn hàng
+        if (orderData.products && orderData.products.length > 0) {
+            for (const item of orderData.products) {
+                const product = await Product.findById(item.productId);
+                if (!product) {
+                    return res.status(400).json({ 
+                        error: 'Sản phẩm không tồn tại', 
+                        productId: item.productId 
+                    });
+                }
+                
+                if (product.stock < item.quantity) {
+                    return res.status(400).json({ 
+                        error: 'Số lượng sản phẩm trong kho không đủ', 
+                        product: product.bookTitle,
+                        requested: item.quantity,
+                        available: product.stock
+                    });
+                }
+            }
+        }
+        
         const order = new Order(orderData);
         const savedOrder = await order.save();
         

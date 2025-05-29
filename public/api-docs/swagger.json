@@ -93,6 +93,11 @@
             "description": "Số lượng đã bán",
             "default": 0
           },
+          "stock": {
+            "type": "number",
+            "description": "Số lượng tồn kho",
+            "default": 0
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time",
@@ -1414,6 +1419,20 @@
                     "value": {
                       "error": "Lỗi khi tạo order",
                       "details": "Products array is required"
+                    }
+                  },
+                  "insufficientStock": {
+                    "value": {
+                      "error": "Số lượng sản phẩm trong kho không đủ",
+                      "product": "Đắc Nhân Tâm",
+                      "requested": 5,
+                      "available": 2
+                    }
+                  },
+                  "productNotFound": {
+                    "value": {
+                      "error": "Sản phẩm không tồn tại",
+                      "productId": "60d21bb067d0d8992e610c87"
                     }
                   }
                 }

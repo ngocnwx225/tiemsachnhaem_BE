@@ -12,7 +12,8 @@ const productBookSchema = new mongoose.Schema({
   description: { type: String },
   imageUrl: { type: String, required: true },
   catalog: { type: String, required: true },
-  soldCount: { type: Number, default: 0 }
+  soldCount: { type: Number, default: 0 },
+  stock: { type: Number, default: 0, required: true }
 }, {
   timestamps: true
 });
