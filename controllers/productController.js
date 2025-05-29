@@ -76,11 +76,7 @@ exports.getProductsByCatalog = async (req, res) => {
         // Tìm sách theo tên catalog thay vì ID
         const products = await Product.find({ catalog: catalogName });
         
-        res.json({
-            success: true,
-            count: products.length,
-            data: products
-        });
+        res.json(products);
     } catch (error) {
         console.error('Error in getProductsByCatalog:', error);
         res.status(500).json({ 
