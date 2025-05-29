@@ -1,5 +1,6 @@
 const Order = require('../models/order');
 const Product = require('../models/product_book');
+const mongoose = require('mongoose');
 
 // Lấy tất cả orders
 exports.getAllOrders = async (req, res) => {
@@ -56,40 +57,135 @@ exports.getAllOrders = async (req, res) => {
 
 // Lấy order theo ID
 exports.getOrderById = async (req, res) => {
+    console.log('Fetching order by ID:', req.params.id);
     try {
-        const order = await Order.findById(req.params.id)
-            .populate('userId', 'fullName email phoneNumber address')
-            .populate('items.bookId', 'title price');
-            
-        if (!order) {
-            return res.status(404).json({ error: 'Không tìm thấy order' });
+        // Kiểm tra xem ID có đúng định dạng MongoDB không
+        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+            console.log('Invalid MongoDB ID format:', req.params.id);
+            return res.status(400).json({ error: 'ID đơn hàng không hợp lệ' });
         }
 
+        // Thử lấy đơn hàng trước khi populate để kiểm tra
+        const orderExists = await Order.findById(req.params.id);
+        console.log('Order exists check:', !!orderExists);
+        
+        if (!orderExists) {
+            return res.status(404).json({ error: 'Không tìm thấy đơn hàng' });
+        }
+
+        // Nếu đơn hàng tồn tại, thực hiện populate
+        const order = await Order.findById(req.params.id);
+        
+        console.log('Order raw data:', JSON.stringify(order));
+        console.log('Order userId:', order.userId);
+        console.log('Order products:', order.products);
+
+        // Populate thủ công để tránh lỗi khi không có reference
+        let userData = null;
+        if (order.userId) {
+            const User = require('../models/user');
+            try {
+                userData = await User.findById(order.userId);
+                console.log('User data found:', !!userData);
+            } catch (userErr) {
+                console.error('Error fetching user data:', userErr);
+            }
+        }
+
+        // Populate thông tin sản phẩm
+        const populatedProducts = [];
+        if (order.products && order.products.length > 0) {
+            for (const item of order.products) {
+                try {
+                    const product = await Product.findById(item.productId);
+                    if (product) {
+                        populatedProducts.push({
+                            product,
+                            quantity: item.quantity,
+                            price: item.price || product.price
+                        });
+                    } else {
+                        console.log('Product not found for ID:', item.productId);
+                        populatedProducts.push({
+                            productId: item.productId,
+                            quantity: item.quantity,
+                            price: item.price,
+                            productNotFound: true
+                        });
+                    }
+                } catch (productErr) {
+                    console.error('Error fetching product:', productErr);
+                }
+            }
+        }
+        
+        console.log('Populated products count:', populatedProducts.length);
+
+        // Tạo response object một cách an toàn
         const formattedOrder = {
             id: order._id,
-            customerInfo: {
-                name: order.userId.fullName,
-                email: order.userId.email,
-                phoneNumber: order.userId.phoneNumber,
-                address: order.userId.address
-            },
             orderInfo: {
                 createdAt: order.createdAt,
                 totalAmount: order.totalAmount,
-                status: order.status
-            },
-            items: order.items.map(item => ({
-                bookId: item.bookId._id,
-                title: item.bookId.title,
-                price: item.bookId.price,
-                quantity: item.quantity,
-                subtotal: item.bookId.price * item.quantity
-            }))
+                status: order.status,
+                orderDate: order.orderDate,
+                paymentMethod: order.paymentMethod,
+                shippingAddress: order.shippingAddress
+            }
         };
 
+        // Thêm thông tin khách hàng nếu có
+        if (userData) {
+            formattedOrder.customerInfo = {
+                id: userData._id,
+                name: userData.fullName,
+                email: userData.email,
+                phoneNumber: userData.phoneNumber || 'N/A',
+                address: userData.address || 'N/A'
+            };
+        } else {
+            formattedOrder.customerInfo = {
+                id: order.userId,
+                name: 'N/A',
+                email: 'N/A',
+                phoneNumber: 'N/A',
+                address: 'N/A'
+            };
+        }
+
+        // Thêm thông tin sản phẩm
+        formattedOrder.items = populatedProducts.map(item => {
+            if (item.productNotFound) {
+                return {
+                    productId: item.productId,
+                    quantity: item.quantity,
+                    price: item.price || 0,
+                    subtotal: (item.price || 0) * item.quantity,
+                    productNotFound: true
+                };
+            }
+            
+            return {
+                productId: item.product._id,
+                ISBN: item.product.ISBN,
+                title: item.product.bookTitle,
+                author: item.product.author,
+                price: item.price || item.product.price,
+                imageUrl: item.product.imageUrl,
+                quantity: item.quantity,
+                subtotal: (item.price || item.product.price) * item.quantity
+            };
+        });
+
+        console.log('Formatted response successfully');
         res.json(formattedOrder);
     } catch (err) {
-        res.status(500).json({ error: 'Lỗi khi lấy dữ liệu order' });
+        console.error('Error in getOrderById:', err);
+        res.status(500).json({ 
+            error: 'Lỗi khi lấy dữ liệu đơn hàng', 
+            details: err.message,
+            stack: err.stack
+        });
     }
 };
 
@@ -207,43 +303,101 @@ exports.deleteOrder = async (req, res) => {
 // Lấy thống kê về đơn hàng, doanh thu và user
 exports.getOrderStatistics = async (req, res) => {
     try {
+        console.log('Fetching order statistics...');
+        
         // Tổng số đơn hàng
         const totalOrders = await Order.countDocuments();
+        console.log('Total orders count:', totalOrders);
         
         // Tổng số đơn hàng với trạng thái pending
         const pendingOrders = await Order.countDocuments({ status: 'pending' });
+        console.log('Pending orders count:', pendingOrders);
         
         // Tổng doanh thu (tổng totalAmount của tất cả đơn hàng)
-        const revenueResult = await Order.aggregate([
-            {
-                $group: {
-                    _id: null,
-                    totalRevenue: { $sum: '$totalAmount' }
+        let totalRevenue = 0;
+        try {
+            const revenueResult = await Order.aggregate([
+                {
+                    $group: {
+                        _id: null,
+                        totalRevenue: { $sum: '$totalAmount' }
+                    }
                 }
-            }
-        ]);
-        const totalRevenue = revenueResult.length > 0 ? revenueResult[0].totalRevenue : 0;
+            ]);
+            totalRevenue = revenueResult.length > 0 ? revenueResult[0].totalRevenue : 0;
+            console.log('Total revenue calculated:', totalRevenue);
+        } catch (revenueErr) {
+            console.error('Error calculating revenue:', revenueErr);
+            // Continue with zero revenue
+        }
         
         // Tổng số người dùng (có role = 'user')
-        const User = require('../models/user');
-        const totalUsers = await User.countDocuments({ role: 'user' });
+        let totalUsers = 0;
+        try {
+            const User = require('../models/user');
+            totalUsers = await User.countDocuments({ role: 'user' });
+            console.log('Total users count:', totalUsers);
+        } catch (userErr) {
+            console.error('Error counting users:', userErr);
+            // Continue with zero users
+        }
         
         // 5 đơn hàng gần nhất
-        const recentOrders = await Order.find()
-            .sort({ createdAt: -1 })
-            .limit(5)
-            .populate('userId', 'fullName email');
+        let recentOrders = [];
+        try {
+            recentOrders = await Order.find()
+                .sort({ createdAt: -1 })
+                .limit(5);
+            console.log('Recent orders fetched:', recentOrders.length);
+        } catch (recentErr) {
+            console.error('Error fetching recent orders:', recentErr);
+            // Continue with empty orders
+        }
             
         // Format đơn hàng gần đây để có thông tin chi tiết hơn
-        const formattedRecentOrders = recentOrders.map(order => ({
-            id: order._id,
-            totalAmount: order.totalAmount,
-            status: order.status,
-            orderDate: order.orderDate,
-            customerName: order.userId ? order.userId.fullName : 'N/A',
-            customerEmail: order.userId ? order.userId.email : 'N/A',
-            productCount: order.products ? order.products.length : 0
+        const formattedRecentOrders = await Promise.all(recentOrders.map(async (order) => {
+            try {
+                // Lấy thông tin người dùng nếu có userId
+                let customerName = 'N/A';
+                let customerEmail = 'N/A';
+                
+                if (order.userId) {
+                    try {
+                        const User = require('../models/user');
+                        const user = await User.findById(order.userId);
+                        if (user) {
+                            customerName = user.fullName || 'N/A';
+                            customerEmail = user.email || 'N/A';
+                        }
+                    } catch (userErr) {
+                        console.error(`Error fetching user for order ${order._id}:`, userErr);
+                    }
+                }
+                
+                return {
+                    id: order._id,
+                    totalAmount: order.totalAmount || 0,
+                    status: order.status || 'pending',
+                    orderDate: order.orderDate || order.createdAt,
+                    customerName,
+                    customerEmail,
+                    productCount: order.products ? order.products.length : 0
+                };
+            } catch (orderErr) {
+                console.error(`Error formatting order ${order._id}:`, orderErr);
+                return {
+                    id: order._id,
+                    totalAmount: 0,
+                    status: 'unknown',
+                    orderDate: order.createdAt,
+                    customerName: 'Error',
+                    customerEmail: 'Error',
+                    productCount: 0
+                };
+            }
         }));
+        
+        console.log('Formatted recent orders successfully');
         
         res.json({
             totalOrders,
@@ -256,7 +410,8 @@ exports.getOrderStatistics = async (req, res) => {
         console.error('Error getting order statistics:', err);
         res.status(500).json({ 
             error: 'Lỗi khi lấy thống kê đơn hàng',
-            details: err.message 
+            details: err.message,
+            stack: err.stack
         });
     }
 }; 
