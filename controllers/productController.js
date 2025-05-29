@@ -172,11 +172,7 @@ exports.getTopSellingProducts = async (req, res) => {
                 .limit(limit);
         }
             
-        res.json({
-            success: true,
-            count: topProducts.length,
-            data: topProducts
-        });
+        res.json(topProducts);
     } catch (error) {
         console.error('Error in getTopSellingProducts:', error);
         res.status(500).json({

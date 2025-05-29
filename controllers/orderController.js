@@ -202,4 +202,61 @@ exports.deleteOrder = async (req, res) => {
     } catch (err) {
         res.status(500).json({ error: 'Lỗi khi xóa order' });
     }
+};
+
+// Lấy thống kê về đơn hàng, doanh thu và user
+exports.getOrderStatistics = async (req, res) => {
+    try {
+        // Tổng số đơn hàng
+        const totalOrders = await Order.countDocuments();
+        
+        // Tổng số đơn hàng với trạng thái pending
+        const pendingOrders = await Order.countDocuments({ status: 'pending' });
+        
+        // Tổng doanh thu (tổng totalAmount của tất cả đơn hàng)
+        const revenueResult = await Order.aggregate([
+            {
+                $group: {
+                    _id: null,
+                    totalRevenue: { $sum: '$totalAmount' }
+                }
+            }
+        ]);
+        const totalRevenue = revenueResult.length > 0 ? revenueResult[0].totalRevenue : 0;
+        
+        // Tổng số người dùng (có role = 'user')
+        const User = require('../models/user');
+        const totalUsers = await User.countDocuments({ role: 'user' });
+        
+        // 5 đơn hàng gần nhất
+        const recentOrders = await Order.find()
+            .sort({ createdAt: -1 })
+            .limit(5)
+            .populate('userId', 'fullName email');
+            
+        // Format đơn hàng gần đây để có thông tin chi tiết hơn
+        const formattedRecentOrders = recentOrders.map(order => ({
+            id: order._id,
+            totalAmount: order.totalAmount,
+            status: order.status,
+            orderDate: order.orderDate,
+            customerName: order.userId ? order.userId.fullName : 'N/A',
+            customerEmail: order.userId ? order.userId.email : 'N/A',
+            productCount: order.products ? order.products.length : 0
+        }));
+        
+        res.json({
+            totalOrders,
+            pendingOrders,
+            totalRevenue,
+            totalUsers,
+            recentOrders: formattedRecentOrders
+        });
+    } catch (err) {
+        console.error('Error getting order statistics:', err);
+        res.status(500).json({ 
+            error: 'Lỗi khi lấy thống kê đơn hàng',
+            details: err.message 
+        });
+    }
 }; 

@@ -2097,6 +2097,117 @@
           "404": { "description": "Không tìm thấy user" }
         }
       }
+    },
+    "/orders/statistics": {
+      "get": {
+        "tags": ["Orders"],
+        "summary": "Lấy thống kê về đơn hàng, doanh thu và người dùng",
+        "description": "API này trả về dữ liệu tổng hợp bao gồm tổng đơn hàng, đơn hàng chờ xử lý, tổng doanh thu, tổng số người dùng và danh sách đơn hàng gần đây",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Thống kê thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "totalOrders": {
+                      "type": "integer",
+                      "description": "Tổng số đơn hàng"
+                    },
+                    "pendingOrders": {
+                      "type": "integer",
+                      "description": "Tổng số đơn hàng chờ xử lý (status = pending)"
+                    },
+                    "totalRevenue": {
+                      "type": "number",
+                      "description": "Tổng doanh thu từ tất cả đơn hàng"
+                    },
+                    "totalUsers": {
+                      "type": "integer",
+                      "description": "Tổng số người dùng (role = user)"
+                    },
+                    "recentOrders": {
+                      "type": "array",
+                      "description": "Danh sách 5 đơn hàng gần nhất",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "description": "ID của đơn hàng"
+                          },
+                          "totalAmount": {
+                            "type": "number",
+                            "description": "Tổng tiền đơn hàng"
+                          },
+                          "status": {
+                            "type": "string",
+                            "description": "Trạng thái đơn hàng"
+                          },
+                          "orderDate": {
+                            "type": "string",
+                            "description": "Ngày đặt hàng"
+                          },
+                          "customerName": {
+                            "type": "string",
+                            "description": "Tên khách hàng"
+                          },
+                          "customerEmail": {
+                            "type": "string",
+                            "description": "Email khách hàng"
+                          },
+                          "productCount": {
+                            "type": "integer",
+                            "description": "Số lượng sản phẩm trong đơn hàng"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "totalOrders": 120,
+                  "pendingOrders": 15,
+                  "totalRevenue": 15000000,
+                  "totalUsers": 85,
+                  "recentOrders": [
+                    {
+                      "id": "64a7b3c4f3d7a123e89b1d45",
+                      "totalAmount": 300000,
+                      "status": "pending",
+                      "orderDate": "2023-08-06T14:25:30.123Z",
+                      "customerName": "Nguyễn Văn A",
+                      "customerEmail": "nguyenvana@example.com",
+                      "productCount": 2
+                    },
+                    {
+                      "id": "64a7b3c4f3d7a123e89b1d46",
+                      "totalAmount": 450000,
+                      "status": "processing",
+                      "orderDate": "2023-08-05T10:15:20.456Z",
+                      "customerName": "Trần Thị B",
+                      "customerEmail": "tranthib@example.com",
+                      "productCount": 3
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Lỗi server"
+          }
+        }
+      }
     }
   }
 } 

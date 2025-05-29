@@ -2,6 +2,9 @@ const express = require('express');
 const router = express.Router();
 const orderController = require('../controllers/orderController');
 
+// Get order statistics
+router.get('/statistics', orderController.getOrderStatistics);
+
 // Get all orders
 router.get('/', orderController.getAllOrders);
 
