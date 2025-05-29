@@ -8,6 +8,15 @@ exports.getAllOrders = async (req, res) => {
         // Log để kiểm tra
         console.log('Fetching orders...');
         
+        // Kiểm tra trạng thái kết nối database
+        if (mongoose.connection.readyState !== 1) {
+            console.log('Database connection is not ready. Current state:', mongoose.connection.readyState);
+            return res.status(500).json({ 
+                error: 'Kết nối database không khả dụng, vui lòng thử lại sau',
+                connectionState: mongoose.connection.readyState
+            });
+        }
+        
         const orders = await Order.find();
         console.log('Found orders:', orders.length);
         
@@ -48,6 +57,15 @@ exports.getAllOrders = async (req, res) => {
         res.json(formattedOrders);
     } catch (err) {
         console.error('Error in getAllOrders:', err);
+        
+        // Xử lý lỗi kết nối MongoDB
+        if (err.name === 'MongoNetworkError' || err.name === 'MongoTimeoutError') {
+            return res.status(503).json({
+                error: 'Không thể kết nối đến database, vui lòng thử lại sau',
+                details: err.message
+            });
+        }
+        
         res.status(500).json({ 
             error: 'Lỗi khi lấy dữ liệu orders',
             details: err.message 
@@ -59,6 +77,15 @@ exports.getAllOrders = async (req, res) => {
 exports.getOrderById = async (req, res) => {
     console.log('Fetching order by ID:', req.params.id);
     try {
+        // Kiểm tra trạng thái kết nối database
+        if (mongoose.connection.readyState !== 1) {
+            console.log('Database connection is not ready. Current state:', mongoose.connection.readyState);
+            return res.status(500).json({ 
+                error: 'Kết nối database không khả dụng, vui lòng thử lại sau',
+                connectionState: mongoose.connection.readyState
+            });
+        }
+        
         // Kiểm tra xem ID có đúng định dạng MongoDB không
         if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
             console.log('Invalid MongoDB ID format:', req.params.id);
@@ -192,6 +219,15 @@ exports.getOrderById = async (req, res) => {
 // Tạo order mới
 exports.createOrder = async (req, res) => {
     try {
+        // Kiểm tra trạng thái kết nối database
+        if (mongoose.connection.readyState !== 1) {
+            console.log('Database connection is not ready. Current state:', mongoose.connection.readyState);
+            return res.status(500).json({ 
+                error: 'Kết nối database không khả dụng, vui lòng thử lại sau',
+                connectionState: mongoose.connection.readyState
+            });
+        }
+        
         // Lấy userId từ request body
         const { userId } = req.body;
         
@@ -266,6 +302,15 @@ exports.createOrder = async (req, res) => {
         res.status(201).json(savedOrder);
     } catch (err) {
         console.error('Error creating order:', err);
+        
+        // Xử lý lỗi kết nối MongoDB
+        if (err.name === 'MongoNetworkError' || err.name === 'MongoTimeoutError') {
+            return res.status(503).json({
+                error: 'Không thể kết nối đến database, vui lòng thử lại sau',
+                details: err.message
+            });
+        }
+        
         res.status(400).json({ error: 'Lỗi khi tạo order', details: err.message });
     }
 };
@@ -273,6 +318,15 @@ exports.createOrder = async (req, res) => {
 // Cập nhật order
 exports.updateOrder = async (req, res) => {
     try {
+        // Kiểm tra trạng thái kết nối database
+        if (mongoose.connection.readyState !== 1) {
+            console.log('Database connection is not ready. Current state:', mongoose.connection.readyState);
+            return res.status(500).json({ 
+                error: 'Kết nối database không khả dụng, vui lòng thử lại sau',
+                connectionState: mongoose.connection.readyState
+            });
+        }
+        
         const order = await Order.findByIdAndUpdate(
             req.params.id,
             req.body,
@@ -283,20 +337,49 @@ exports.updateOrder = async (req, res) => {
         }
         res.json(order);
     } catch (err) {
-        res.status(400).json({ error: 'Lỗi khi cập nhật order' });
+        console.error('Error updating order:', err);
+        
+        // Xử lý lỗi kết nối MongoDB
+        if (err.name === 'MongoNetworkError' || err.name === 'MongoTimeoutError') {
+            return res.status(503).json({
+                error: 'Không thể kết nối đến database, vui lòng thử lại sau',
+                details: err.message
+            });
+        }
+        
+        res.status(400).json({ error: 'Lỗi khi cập nhật order', details: err.message });
     }
 };
 
 // Xóa order
 exports.deleteOrder = async (req, res) => {
     try {
+        // Kiểm tra trạng thái kết nối database
+        if (mongoose.connection.readyState !== 1) {
+            console.log('Database connection is not ready. Current state:', mongoose.connection.readyState);
+            return res.status(500).json({ 
+                error: 'Kết nối database không khả dụng, vui lòng thử lại sau',
+                connectionState: mongoose.connection.readyState
+            });
+        }
+        
         const order = await Order.findByIdAndDelete(req.params.id);
         if (!order) {
             return res.status(404).json({ error: 'Không tìm thấy order' });
         }
         res.json({ message: 'Đã xóa order thành công' });
     } catch (err) {
-        res.status(500).json({ error: 'Lỗi khi xóa order' });
+        console.error('Error deleting order:', err);
+        
+        // Xử lý lỗi kết nối MongoDB
+        if (err.name === 'MongoNetworkError' || err.name === 'MongoTimeoutError') {
+            return res.status(503).json({
+                error: 'Không thể kết nối đến database, vui lòng thử lại sau',
+                details: err.message
+            });
+        }
+        
+        res.status(500).json({ error: 'Lỗi khi xóa order', details: err.message });
     }
 };
 
@@ -304,6 +387,15 @@ exports.deleteOrder = async (req, res) => {
 exports.getOrderStatistics = async (req, res) => {
     try {
         console.log('Fetching order statistics...');
+        
+        // Kiểm tra trạng thái kết nối database
+        if (mongoose.connection.readyState !== 1) {
+            console.log('Database connection is not ready. Current state:', mongoose.connection.readyState);
+            return res.status(500).json({ 
+                error: 'Kết nối database không khả dụng, vui lòng thử lại sau',
+                connectionState: mongoose.connection.readyState
+            });
+        }
         
         // Tổng số đơn hàng
         const totalOrders = await Order.countDocuments();
@@ -408,6 +500,15 @@ exports.getOrderStatistics = async (req, res) => {
         });
     } catch (err) {
         console.error('Error getting order statistics:', err);
+        
+        // Xử lý lỗi kết nối MongoDB
+        if (err.name === 'MongoNetworkError' || err.name === 'MongoTimeoutError') {
+            return res.status(503).json({
+                error: 'Không thể kết nối đến database, vui lòng thử lại sau',
+                details: err.message
+            });
+        }
+        
         res.status(500).json({ 
             error: 'Lỗi khi lấy thống kê đơn hàng',
             details: err.message,

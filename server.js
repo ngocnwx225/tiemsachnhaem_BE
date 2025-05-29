@@ -21,6 +21,46 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const MONGODB_URI = process.env.SERVER_URI_MONGODB;
 
+// Cấu hình kết nối MongoDB với cơ chế tự động reconnect
+const connectWithRetry = () => {
+  console.log('🔄 Đang kết nối đến MongoDB...');
+  mongoose.connect(MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    serverSelectionTimeoutMS: 5000, // Timeout sau 5s nếu không kết nối được
+    socketTimeoutMS: 45000, // Đóng socket sau 45s không hoạt động
+  })
+  .then(() => {
+    console.log('✅ Đã kết nối MongoDB thành công!');
+  })
+  .catch(err => {
+    console.error('❌ Kết nối MongoDB thất bại:', err.message);
+    console.log('⏱️ Thử kết nối lại sau 5 giây...');
+    setTimeout(connectWithRetry, 5000); // Thử lại sau 5 giây
+  });
+};
+
+// Xử lý sự kiện kết nối MongoDB
+mongoose.connection.on('connected', () => {
+  console.log('🔌 Mongoose đã kết nối');
+});
+
+mongoose.connection.on('error', (err) => {
+  console.error('🔌 Mongoose lỗi kết nối:', err);
+});
+
+mongoose.connection.on('disconnected', () => {
+  console.log('🔌 Mongoose đã ngắt kết nối');
+  connectWithRetry(); // Thử kết nối lại khi bị ngắt
+});
+
+// Xử lý khi ứng dụng đóng để đóng kết nối MongoDB
+process.on('SIGINT', async () => {
+  await mongoose.connection.close();
+  console.log('Kết nối MongoDB đã đóng do ứng dụng kết thúc');
+  process.exit(0);
+});
+
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -45,10 +85,8 @@ app.use((err, req, res, next) => {
     res.status(500).json({ message: 'Something went wrong!' });
 });
 
-// Kết nối MongoDB
-mongoose.connect(MONGODB_URI)
-.then(() => console.log('✅ Đã kết nối MongoDB thành công!'))
-.catch((err) => console.error('❌ Kết nối MongoDB thất bại:', err));
+// Khởi tạo kết nối MongoDB
+connectWithRetry();
 
 // Khởi động server
 app.listen(PORT, () => {
