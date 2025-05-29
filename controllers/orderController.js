@@ -19,6 +19,7 @@ exports.getAllOrders = async (req, res) => {
             try {
                 // Populate thông tin user
                 await order.populate('userId', 'fullName email');
+                // await order.populate('products.productId', 'title price');
                 
                 return {
                     id: order._id,
@@ -95,23 +96,53 @@ exports.getOrderById = async (req, res) => {
 // Tạo order mới
 exports.createOrder = async (req, res) => {
     try {
-        const order = new Order(req.body);
+        // Lấy userId từ request body
+        const { userId } = req.body;
+        
+        if (!userId) {
+            return res.status(400).json({ error: 'userId là bắt buộc' });
+        }
+        
+        // Tạo đơn hàng với dữ liệu từ người dùng
+        const orderData = {
+            ...req.body,
+            orderDate: new Date().toISOString(),
+            status: "pending",
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        };
+        
+        // Tính toán tổng tiền từ sản phẩm
+        let totalAmount = 0;
+        if (orderData.products && orderData.products.length > 0) {
+            orderData.products.forEach(item => {
+                totalAmount += item.price * item.quantity;
+            });
+        }
+        orderData.totalAmount = totalAmount;
+        
+        const order = new Order(orderData);
         const savedOrder = await order.save();
         
-        // Cập nhật soldCount cho từng sản phẩm trong đơn hàng
-        if (savedOrder.items && savedOrder.items.length > 0) {
-            const updatePromises = savedOrder.items.map(async (item) => {
-                // Tăng soldCount của sản phẩm theo số lượng mua
+        // Cập nhật soldCount và giảm stock cho từng sản phẩm trong đơn hàng
+        if (savedOrder.products && savedOrder.products.length > 0) {
+            const updatePromises = savedOrder.products.map(async (item) => {
+                // Tăng soldCount và giảm stock của sản phẩm theo số lượng mua
                 return Product.findByIdAndUpdate(
-                    item.bookId,
-                    { $inc: { soldCount: item.quantity } },
+                    item.productId,
+                    { 
+                        $inc: { 
+                            soldCount: item.quantity,
+                            stock: -item.quantity 
+                        } 
+                    },
                     { new: true }
                 );
             });
             
             // Chờ tất cả các thao tác cập nhật hoàn tất
             await Promise.all(updatePromises);
-            console.log('Updated soldCount for all products in the order');
+            console.log('Updated product data for all products in the order');
         }
         
         res.status(201).json(savedOrder);

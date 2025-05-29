@@ -30,10 +30,21 @@ exports.getAllUsers = async (req, res) => {
 // Lấy user theo id
 exports.getUserById = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id).populate('orders');
+    // Tìm user và populate orders
+    const user = await User.findById(req.params.id).populate({
+      path: 'orders',
+      populate: {
+        path: 'items.bookId',
+        model: 'Product_books',
+        select: 'bookTitle author price imageUrl'
+      }
+    });
+    
     if (!user) return res.status(404).json({ error: 'Không tìm thấy user' });
+    
     const totalOrders = user.orders.length;
     const totalSpent = user.orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
+    
     res.json({
       id: user._id,
       fullName: user.fullName,
@@ -49,7 +60,15 @@ exports.getUserById = async (req, res) => {
         totalAmount: order.totalAmount,
         status: order.status,
         createdAt: order.createdAt,
-        items: order.items
+        items: order.items.map(item => ({
+          bookId: item.bookId._id,
+          title: item.bookId.bookTitle,
+          author: item.bookId.author,
+          price: item.bookId.price,
+          imageUrl: item.bookId.imageUrl,
+          quantity: item.quantity,
+          subtotal: item.bookId.price * item.quantity
+        }))
       }))
     });
   } catch (err) {
