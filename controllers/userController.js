@@ -9,7 +9,7 @@ exports.getAllUsers = async (req, res) => {
     const result = await Promise.all(users.map(async (user) => {
       // Populate orders
       await user.populate('orders');
-      console.log(user.orders);
+      console.log('user.orders', user.orders);
       const totalOrders = user.orders.length;
       const totalSpent = user.orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
       return {
@@ -35,7 +35,7 @@ exports.getUserById = async (req, res) => {
     const user = await User.findById(req.params.id).populate({
       path: 'orders',
       populate: {
-        path: 'items.bookId',
+        path: 'products.productId',
         model: 'Product_books',
         select: 'bookTitle author price imageUrl'
       }
@@ -61,14 +61,14 @@ exports.getUserById = async (req, res) => {
         totalAmount: order.totalAmount,
         status: order.status,
         createdAt: order.createdAt,
-        items: order.items.map(item => ({
-          bookId: item.bookId._id,
-          title: item.bookId.bookTitle,
-          author: item.bookId.author,
-          price: item.bookId.price,
-          imageUrl: item.bookId.imageUrl,
+        items: order.products.map(item => ({
+          bookId: item.productId._id,
+          title: item.productId.bookTitle,
+          author: item.productId.author,
+          price: item.productId.price,
+          imageUrl: item.productId.imageUrl,
           quantity: item.quantity,
-          subtotal: item.bookId.price * item.quantity
+          subtotal: item.productId.price * item.quantity
         }))
       }))
     });

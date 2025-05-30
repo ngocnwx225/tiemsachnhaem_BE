@@ -301,11 +301,12 @@ exports.createOrder = async (req, res) => {
         
         // Thêm order ID vào mảng orders của user
         const User = require('../models/user');
-        await User.findByIdAndUpdate(
+        const updatedUser = await User.findByIdAndUpdate(
             userId,
             { $push: { orders: savedOrder._id } },
             { new: true }
         );
+        console.log('Updated user:', updatedUser);
         console.log('Updated user with new order reference');
         
         res.status(201).json(savedOrder);
