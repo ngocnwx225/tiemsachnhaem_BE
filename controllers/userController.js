@@ -9,6 +9,7 @@ exports.getAllUsers = async (req, res) => {
     const result = await Promise.all(users.map(async (user) => {
       // Populate orders
       await user.populate('orders');
+      console.log(user.orders);
       const totalOrders = user.orders.length;
       const totalSpent = user.orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
       return {

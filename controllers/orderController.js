@@ -299,6 +299,15 @@ exports.createOrder = async (req, res) => {
             console.log('Updated product data for all products in the order');
         }
         
+        // Thêm order ID vào mảng orders của user
+        const User = require('../models/user');
+        await User.findByIdAndUpdate(
+            userId,
+            { $push: { orders: savedOrder._id } },
+            { new: true }
+        );
+        console.log('Updated user with new order reference');
+        
         res.status(201).json(savedOrder);
     } catch (err) {
         console.error('Error creating order:', err);
@@ -363,10 +372,28 @@ exports.deleteOrder = async (req, res) => {
             });
         }
         
-        const order = await Order.findByIdAndDelete(req.params.id);
+        const order = await Order.findById(req.params.id);
         if (!order) {
             return res.status(404).json({ error: 'Không tìm thấy order' });
         }
+
+        // Lấy userId từ order để cập nhật mảng orders của user
+        const userId = order.userId;
+        
+        // Xóa order
+        await Order.findByIdAndDelete(req.params.id);
+        
+        // Xóa reference đến order này khỏi mảng orders của user
+        if (userId) {
+            const User = require('../models/user');
+            await User.findByIdAndUpdate(
+                userId,
+                { $pull: { orders: req.params.id } },
+                { new: true }
+            );
+            console.log('Removed order reference from user');
+        }
+        
         res.json({ message: 'Đã xóa order thành công' });
     } catch (err) {
         console.error('Error deleting order:', err);
