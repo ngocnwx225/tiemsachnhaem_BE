@@ -56,6 +56,7 @@ exports.getUserById = async (req, res) => {
       phoneNumber: user.phoneNumber,
       address: user.address,
       role: user.role,
+      createdAt: user.createdAt,
       orders: user.orders.map(order => ({
         id: order._id,
         totalAmount: order.totalAmount,
